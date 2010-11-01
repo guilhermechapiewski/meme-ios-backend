@@ -1,48 +1,70 @@
 #!/usr/bin/env python
-import urllib
-
-from google.appengine.ext import blobstore, webapp
-from google.appengine.ext.webapp import blobstore_handlers
+import wsgiref.handlers
+from google.appengine.api import images
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+
+class Image(db.Model):
+    data = db.BlobProperty(default=None)
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        upload_url = blobstore.create_upload_url('/img/upload')
         self.response.out.write('''
         <html>
             <head>
                 <title>Yahoo! Meme iOS Backend application</title>
             </head>
             <body>
-                <form action="%s" method="POST" enctype="multipart/form-data">
+                <form action="/img/upload" method="POST" enctype="multipart/form-data">
                     Upload File: <input type="file" name="file"><br>
                     <input type="submit" name="submit" value="Submit">
                 </form>
             </body>
         </html>
-        ''' % upload_url)
+        ''')
         
 
-class ImgHandler(blobstore_handlers.BlobstoreDownloadHandler):
-    def get(self, resource):
-        resource = str(urllib.unquote(resource))
-        blob_info = blobstore.BlobInfo.get(resource)
-        self.send_blob(blob_info)
+class ImgHandler(webapp.RequestHandler):
+    def get(self, img_key):
+        image = db.get(img_key)
+        self.response.headers['Content-Type'] = 'image/png'
+        self.response.out.write(image.data)
 
-class ImgUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+class ImgUploadHandler(webapp.RequestHandler):
     def post(self):
-        upload_files = self.get_uploads('file')
-        blob_info = upload_files[0]
-        self.redirect('/img/%s' % blob_info.key())
+        img_data = self.request.POST.get('file').file.read()
+
+        try:
+          img = images.Image(img_data)
+          img.im_feeling_lucky()
+          #png_data = img.execute_transforms(images.PNG)
+
+          stored_image = Image(data=img_data)
+          stored_image.put()
+
+          self.redirect('/img/%s' % stored_image.key())
+        except images.BadImageError:
+          self.error(400)
+          self.response.out.write(
+              'Sorry, we had a problem processing the image provided.')
+        except images.NotImageError:
+          self.error(400)
+          self.response.out.write(
+              'Sorry, we don\'t recognize that image format.'
+              'We can process JPEG, GIF, PNG, BMP, TIFF, and ICO files.')
+        except images.LargeImageError:
+          self.error(400)
+          self.response.out.write(
+              'Sorry, the image provided was too large for us to process.')
 
 def main():
     application = webapp.WSGIApplication([
                 ('/', MainHandler),
-                ('/img/([^/]+)?', ImgHandler),
                 ('/img/upload', ImgUploadHandler),
+                ('/img/(.+)', ImgHandler),
             ], 
             debug=True)
-    run_wsgi_app(application)
+    wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
     main()
