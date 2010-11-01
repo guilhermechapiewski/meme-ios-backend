@@ -23,17 +23,30 @@ class MainHandler(webapp.RequestHandler):
 
 class ImgHandler(webapp.RequestHandler):
     def get(self, img_key):
-        image = db.get(img_key)
-        self.response.headers['Content-Type'] = str(image.content_type)
-        self.response.out.write(image.data)
+        image = None
+        try:
+            image = db.get(img_key)
+        except:
+            self.error(404)
+            self.response.out.write('Image not found.')
+        
+        if image:
+            self.response.headers['Content-Type'] = str(image.content_type)
+            self.response.out.write(image.data)
 
 class ImgUploadHandler(webapp.RequestHandler):
     def post(self):
         img_data = self.request.POST.get('file').file.read()
         content_type = self.request.POST.get('content_type')
+        
         image = Image(data=img_data, content_type=content_type)
         image.put()
-        self.redirect('/img/%s' % image.key())
+        
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write({ 
+            'id': str(image.key()), 
+            'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
+        })
 
 def main():
     application = webapp.WSGIApplication([
