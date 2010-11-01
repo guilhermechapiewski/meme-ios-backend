@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 import wsgiref.handlers
-from google.appengine.api import images
 from google.appengine.ext import db, webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 
-class Image(db.Model):
-    data = db.BlobProperty(default=None)
+from models import Image
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
@@ -17,45 +14,26 @@ class MainHandler(webapp.RequestHandler):
             <body>
                 <form action="/img/upload" method="POST" enctype="multipart/form-data">
                     Upload File: <input type="file" name="file"><br>
+                    Content-type: <select name="content_type"><option>image/gif</option><option>image/jpeg</option><option>image/png</option></select><br>
                     <input type="submit" name="submit" value="Submit">
                 </form>
             </body>
         </html>
         ''')
-        
 
 class ImgHandler(webapp.RequestHandler):
     def get(self, img_key):
         image = db.get(img_key)
-        self.response.headers['Content-Type'] = 'image/png'
+        self.response.headers['Content-Type'] = str(image.content_type)
         self.response.out.write(image.data)
 
 class ImgUploadHandler(webapp.RequestHandler):
     def post(self):
         img_data = self.request.POST.get('file').file.read()
-
-        try:
-          img = images.Image(img_data)
-          img.im_feeling_lucky()
-          #png_data = img.execute_transforms(images.PNG)
-
-          stored_image = Image(data=img_data)
-          stored_image.put()
-
-          self.redirect('/img/%s' % stored_image.key())
-        except images.BadImageError:
-          self.error(400)
-          self.response.out.write(
-              'Sorry, we had a problem processing the image provided.')
-        except images.NotImageError:
-          self.error(400)
-          self.response.out.write(
-              'Sorry, we don\'t recognize that image format.'
-              'We can process JPEG, GIF, PNG, BMP, TIFF, and ICO files.')
-        except images.LargeImageError:
-          self.error(400)
-          self.response.out.write(
-              'Sorry, the image provided was too large for us to process.')
+        content_type = self.request.POST.get('content_type')
+        image = Image(data=img_data, content_type=content_type)
+        image.put()
+        self.redirect('/img/%s' % image.key())
 
 def main():
     application = webapp.WSGIApplication([
