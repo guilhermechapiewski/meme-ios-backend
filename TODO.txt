@@ -1,0 +1,3 @@
+* Simple auth (shared secret) to allow write requests only from allowed clients
+* Detect image content types automatically (using PIL?)
+* Cron job to delete old images (> 30 minutes) from database
