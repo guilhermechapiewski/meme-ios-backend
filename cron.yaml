@@ -1,4 +1,4 @@
 cron:
-- description: delete expired images every hour
+- description: Delete images older than 1 hour.
   url: /img/expiration
   schedule: every 10 minutes
