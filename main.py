@@ -2,6 +2,7 @@
 import datetime
 
 import wsgiref.handlers
+from django.utils import simplejson 
 from google.appengine.ext import db, webapp
 
 from models import Image
@@ -55,11 +56,11 @@ class ImageUploadHandler(webapp.RequestHandler):
         image.put()
         
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write({ 
+        self.response.out.write(simplejson.dumps({ 
             'id': str(image.key()), 
             'content_type': str(image.content_type), 
             'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
-        })
+        }))
 
 def main():
     application = webapp.WSGIApplication([
