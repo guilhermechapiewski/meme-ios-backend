@@ -1,2 +1,1 @@
 * Simple auth (shared secret) to allow write requests only from allowed clients
-* Cron job to delete old images (> 30 minutes) from database

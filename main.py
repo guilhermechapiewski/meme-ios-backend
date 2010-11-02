@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime
 import wsgiref.handlers
 from google.appengine.ext import db, webapp
 
@@ -33,12 +34,23 @@ class ImageHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = str(image.content_type)
             self.response.out.write(image.data)
 
+class ImageExpirationHandler(webapp.RequestHandler):
+    def get(self):
+        if self.request.headers['X-AppEngine-Cron'] == 'true':
+            now = datetime.datetime.now()
+            one_hour_ago = now - datetime.timedelta(hours=1)
+            db.delete(Image.all().filter('date <', one_hour_ago))
+
 class ImageUploadHandler(webapp.RequestHandler):
     def post(self):
         img_data = self.request.POST.get('file').file.read()
         content_type = self.request.POST.get('file').type
         
-        image = Image(data=img_data, content_type=content_type)
+        image = Image(
+            data=img_data, 
+            content_type=content_type, 
+            date=datetime.datetime.now()
+        )
         image.put()
         
         self.response.headers['Content-Type'] = 'application/json'
@@ -51,6 +63,7 @@ class ImageUploadHandler(webapp.RequestHandler):
 def main():
     application = webapp.WSGIApplication([
                 ('/', MainHandler),
+                ('/img/expiration', ImageExpirationHandler),
                 ('/img/upload', ImageUploadHandler),
                 ('/img/(.+)', ImageHandler),
             ], 
