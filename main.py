@@ -14,14 +14,13 @@ class MainHandler(webapp.RequestHandler):
             <body>
                 <form action="/img/upload" method="POST" enctype="multipart/form-data">
                     Upload File: <input type="file" name="file"><br>
-                    Content-type: <select name="content_type"><option>image/gif</option><option>image/jpeg</option><option>image/png</option></select><br>
                     <input type="submit" name="submit" value="Submit">
                 </form>
             </body>
         </html>
         ''')
 
-class ImgHandler(webapp.RequestHandler):
+class ImageHandler(webapp.RequestHandler):
     def get(self, img_key):
         image = None
         try:
@@ -34,10 +33,10 @@ class ImgHandler(webapp.RequestHandler):
             self.response.headers['Content-Type'] = str(image.content_type)
             self.response.out.write(image.data)
 
-class ImgUploadHandler(webapp.RequestHandler):
+class ImageUploadHandler(webapp.RequestHandler):
     def post(self):
         img_data = self.request.POST.get('file').file.read()
-        content_type = self.request.POST.get('content_type')
+        content_type = self.request.POST.get('file').type
         
         image = Image(data=img_data, content_type=content_type)
         image.put()
@@ -45,14 +44,15 @@ class ImgUploadHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write({ 
             'id': str(image.key()), 
+            'content_type': str(image.content_type), 
             'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
         })
 
 def main():
     application = webapp.WSGIApplication([
                 ('/', MainHandler),
-                ('/img/upload', ImgUploadHandler),
-                ('/img/(.+)', ImgHandler),
+                ('/img/upload', ImageUploadHandler),
+                ('/img/(.+)', ImageHandler),
             ], 
             debug=True)
     wsgiref.handlers.CGIHandler().run(application)
