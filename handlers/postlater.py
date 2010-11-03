@@ -26,6 +26,16 @@ class PostLaterAddHandler(webapp.RequestHandler):
             </body>
         </html>
         ''')
+
+class PostLaterDeleteHandler(webapp.RequestHandler):
+    def get(self):
+        key = self.request.get('id')
+        try:
+            db.delete(db.get(key))
+            self.response.out.write('ok')
+        except:
+            self.error(404)
+            self.response.out.write('Post not found.')
         
 class PostLaterHandler(webapp.RequestHandler):
     def get(self, username):
