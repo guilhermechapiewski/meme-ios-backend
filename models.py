@@ -10,6 +10,6 @@ class Post(db.Model):
     url = db.StringProperty()
     date = db.DateTimeProperty()
 
-class Auth(db.Model):
-    app_name = db.StringProperty()
+class App(db.Model):
+    name = db.StringProperty()
     secret = db.StringProperty()
