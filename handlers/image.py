@@ -30,6 +30,13 @@ class ImageExpirationHandler(webapp.RequestHandler):
                 image_blob.delete()
                 image.delete()
 
+class ImageUploadUrlHandler(webapp.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps({ 
+            'url': blobstore.create_upload_url('/img/upload'),
+        }))
+    
 class ImageUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def auth(self):
         '''

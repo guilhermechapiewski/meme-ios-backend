@@ -2,7 +2,6 @@ from google.appengine.ext import blobstore, webapp
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        upload_url = blobstore.create_upload_url('/img/upload')
         self.response.out.write('''
         <html>
             <head>
@@ -36,6 +35,6 @@ class MainHandler(webapp.RequestHandler):
             </body>
         </html>
         ''' % (
-            upload_url, 
+            blobstore.create_upload_url('/img/upload'), 
             self.request.headers['Host'],
         ))
