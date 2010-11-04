@@ -1,6 +1,5 @@
 import datetime
 import hashlib
-import urllib
 
 from django.utils import simplejson 
 from google.appengine.ext import db, blobstore, webapp
