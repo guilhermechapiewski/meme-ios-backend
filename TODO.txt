@@ -1,2 +1,1 @@
-* Migrate image storage from Datastore to Blobstore (billing must be enabled)
 * Simple auth (shared secret) to allow write requests only from allowed clients

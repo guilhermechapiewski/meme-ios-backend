@@ -25,8 +25,8 @@ class ImageExpirationHandler(webapp.RequestHandler):
     def get(self):
         if self.request.headers.get('X-AppEngine-Cron', 'false') == 'true':
             now = datetime.datetime.now()
-            one_hour_ago = now - datetime.timedelta(hours=1)
-            for image in Image.all().filter('date <', one_hour_ago):
+            half_hour_ago = now - datetime.timedelta(minutes=30)
+            for image in Image.all().filter('date <', half_hour_ago):
                 image_blob = blobstore.BlobInfo.get(image.blob_key)
                 image_blob.delete()
                 image.delete()
