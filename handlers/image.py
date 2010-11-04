@@ -1,12 +1,14 @@
 import datetime
 import hashlib
+import urllib
 
 from django.utils import simplejson 
-from google.appengine.ext import db, webapp
+from google.appengine.ext import db, blobstore, webapp
+from google.appengine.ext.webapp import blobstore_handlers
 
 from models import App, Image
 
-class ImageHandler(webapp.RequestHandler):
+class ImageHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self, img_key):
         image = None
         try:
@@ -17,16 +19,19 @@ class ImageHandler(webapp.RequestHandler):
         
         if image:
             self.response.headers['Content-Type'] = str(image.content_type)
-            self.response.out.write(image.data)
+            self.send_blob(blobstore.BlobInfo.get(image.blob_key))
 
 class ImageExpirationHandler(webapp.RequestHandler):
     def get(self):
         if self.request.headers.get('X-AppEngine-Cron', 'false') == 'true':
             now = datetime.datetime.now()
             one_hour_ago = now - datetime.timedelta(hours=1)
-            db.delete(Image.all().filter('date <', one_hour_ago))
+            for image in Image.all().filter('date <', one_hour_ago):
+                image_blob = blobstore.BlobInfo.get(image.blob_key)
+                image_blob.delete()
+                image.delete()
 
-class ImageUploadHandler(webapp.RequestHandler):
+class ImageUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def auth(self):
         '''
         app_name = self.request.headers.get('X-MemeApp-AppId', None)
@@ -50,20 +55,19 @@ class ImageUploadHandler(webapp.RequestHandler):
         return True
     
     def post(self):
-        if self.auth():        
-            img_data = self.request.POST.get('file').file.read()
-            content_type = self.request.POST.get('file').type
-        
-            image = Image(
-                data=img_data, 
-                content_type=content_type, 
-                date=datetime.datetime.now()
-            )
-            image.put()
-        
-            self.response.headers['Content-Type'] = 'application/json'
-            self.response.out.write(simplejson.dumps({ 
-                'id': str(image.key()), 
-                'content_type': str(image.content_type), 
-                'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
-            }))
+        upload_files = self.get_uploads('file')
+        file_info = upload_files[0]
+    
+        image = Image(
+            blob_key=str(file_info.key()), 
+            content_type=file_info.content_type, 
+            date=datetime.datetime.now()
+        )
+        image.put()
+    
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps({ 
+            'id': str(image.key()), 
+            'content_type': str(image.content_type), 
+            'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
+        }))

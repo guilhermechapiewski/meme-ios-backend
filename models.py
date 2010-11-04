@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 
 class Image(db.Model):
-    data = db.BlobProperty()
+    blob_key = db.StringProperty()
     content_type = db.StringProperty()
     date = db.DateTimeProperty()
 

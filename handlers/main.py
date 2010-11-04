@@ -1,7 +1,8 @@
-from google.appengine.ext import webapp
+from google.appengine.ext import blobstore, webapp
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
+        upload_url = blobstore.create_upload_url('/img/upload')
         self.response.out.write('''
         <html>
             <head>
@@ -22,7 +23,7 @@ class MainHandler(webapp.RequestHandler):
                 <h1>Yahoo! Meme iOS Backend application</h1>
                 <h2>1) Image upload</h2>
                 <p>
-                    <form action="/img/upload" method="POST" enctype="multipart/form-data">
+                    <form action="%s" method="POST" enctype="multipart/form-data">
                         Upload File: <input type="file" name="file"> <input type="submit" name="submit" value="Submit">
                     </form>
                 </p>
@@ -34,4 +35,7 @@ class MainHandler(webapp.RequestHandler):
                 </p>
             </body>
         </html>
-        ''' % self.request.headers['Host'])
+        ''' % (
+            upload_url, 
+            self.request.headers['Host'],
+        ))
