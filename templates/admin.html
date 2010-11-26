@@ -14,7 +14,7 @@
               $('#bookmarklet_text').show();
           };
           
-          var update_highlight_query = function() {
+          var update_highlight_query = function(display_warning) {
               var new_query = yql_query_template;
               new_query = new_query.replace('#highlight_amount#', $('#highlight_amount').val());
               new_query = new_query.replace('#highlight_query#', $('#highlight_query').val());
@@ -24,6 +24,10 @@
               var new_search = meme_search_template.replace('#highlight_query#', $('#highlight_query').val());
               $('#meme_search').html(new_search);
               $('#meme_search_link').attr('href', new_search);
+              
+              if (display_warning) {
+                  $('#highlight_warning').show();
+              }
           };
           
           var highlight_submit = function() {
@@ -42,45 +46,45 @@
         
           $(document).ready(function() {
               $('#generate_bookmarklet').click(function(){ generate_bookmarklet() });
-              $('#highlight_query').keyup(function(){ update_highlight_query(); });
-              $('#highlight_query').keydown(function(){ update_highlight_query(); });
-              $('#highlight_amount').keyup(function(){ update_highlight_query(); });
-              $('#highlight_amount').keydown(function(){ update_highlight_query(); });
+              $('#highlight_query').keyup(function(){ update_highlight_query(true); });
+              $('#highlight_query').keydown(function(){ update_highlight_query(true); });
+              $('#highlight_amount').keyup(function(){ update_highlight_query(true); });
+              $('#highlight_amount').keydown(function(){ update_highlight_query(true); });
               $('#highlight_submit').click(function(){ highlight_submit(); });
-              update_highlight_query();
+              update_highlight_query(false);
           });
         </script>
     </head>
     <body>
+        | <a href="{{ logout_url }}">sign out</a> | <a href="http://memeapp.net">website</a> |
         <h1>Yahoo! Meme iOS Backend application</h1>
         <h2>Image upload</h2>
-        <p>
+        <blockquote>
             <form id="img_form" action="{{ img_upload_url }}" method="POST" enctype="multipart/form-data">
                 Upload File: <input type="file" name="file"> <input type="submit" name="submit" value="Submit">
             </form>
-        </p>
+        </blockquote>
         <h2>Post later</h2>
-        <p>
+        <blockquote>
             <input type="hidden" id="bookmarklet_js" value="javascript:(function(){window.open('http://{{ host }}/postlater/add?username=#username#&url='+encodeURIComponent(location.href));})();">
             Type your Meme username here: <input type="text" id="meme_username"> <input type="button" id="generate_bookmarklet" value="Generate my bookmarklet!"><br>
             <span style="display:none;" id="bookmarklet_text">Drag this link to your bookmarks bar: <b><a id="bookmarklet" href="#">Post later to Meme</a></b></span>
-        </p>
+        </blockquote>
         <h2>App Highlights</h2>
-        <p>
+        <blockquote>
             <form id="highlight_form" action="/highlight/update" method="POST">
-                <input type="hidden" name="highlight_name" value="{{ highlight_id }}">
-                Meme Query: <input type="text" id="highlight_query" name="highlight_query" size="50" maxlength="100" value="{{ highlight_query }}"> Max. results: <input type="text" name="highlight_amount" id="highlight_amount" size="1" maxlength="1" value="{{ highlight_amount }}"><br><br>
-                <b>Remember to test your queries before updating:</b><br>
+                <select name="highlight_name"><option>{{ highlight_id }}</option></select>
+                Meme Query: <input type="text" id="highlight_query" name="highlight_query" size="40" maxlength="100" value="{{ highlight_query }}">
+                Max. results: <input type="text" name="highlight_amount" id="highlight_amount" size="1" maxlength="1" value="{{ highlight_amount }}">
+                <br><br>
+                <span id="highlight_warning" style="display:none;"><b><font color="red">Remember to test your queries before updating:</font></b><br></span>
                 <ul>
                     <li>YQL query: <a id="yql_query_link" href="#" target="_blank"><span id="yql_query"></span></a></li>
                     <li>Meme search results: <a id="meme_search_link" href="#" target="_blank"><span id="meme_search"></span></a></li>
+                    <li>Highlights API: <a href="http://{{ host }}/highlight/{{ highlight_id }}" target="_blank">http://{{ host }}/highlight/{{ highlight_id }}</a></li>
                 </ul>
                 <input id="highlight_submit" type="button" value="Update!">
             </form>
-        </p>
-        <br>
-        <p>
-            <a href="{{ logout_url }}">sign out</a> | <a href="http://memeapp.net">website</a>
-        </p>
+        </blockquote>
     </body>
 </html>
