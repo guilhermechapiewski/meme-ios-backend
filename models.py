@@ -13,3 +13,8 @@ class Post(db.Model):
 class App(db.Model):
     name = db.StringProperty()
     secret = db.StringProperty()
+
+class Highlight(db.Model):
+    name = db.StringProperty()
+    query = db.StringProperty()
+    amount = db.IntegerProperty()

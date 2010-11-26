@@ -67,7 +67,8 @@
         </p>
         <h2>App Highlights</h2>
         <p>
-            <form id="highlight_form" action="/hightlight/update" method="POST">
+            <form id="highlight_form" action="/highlight/update" method="POST">
+                <input type="hidden" name="highlight_name" value="{{ highlight_id }}">
                 Meme Query: <input type="text" id="highlight_query" name="highlight_query" size="50" maxlength="100" value="{{ highlight_query }}"> Max. results: <input type="text" name="highlight_amount" id="highlight_amount" size="1" maxlength="1" value="{{ highlight_amount }}"><br><br>
                 <b>Remember to test your queries before updating:</b><br>
                 <ul>
