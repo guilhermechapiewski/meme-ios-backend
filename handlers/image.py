@@ -34,7 +34,7 @@ class ImageUploadUrlHandler(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(simplejson.dumps({ 
-            'url': blobstore.create_upload_url('/img/upload'),
+            'url': blobstore.create_upload_url('/v1/img/upload'),
         }))
     
 class ImageUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
@@ -75,5 +75,5 @@ class ImageUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         self.response.out.write(simplejson.dumps({ 
             'id': str(image.key()), 
             'content_type': str(image.content_type), 
-            'url': 'http://%s/img/%s' % (self.request.headers['Host'], image.key()),
+            'url': 'http://%s/v1/img/%s' % (self.request.headers['Host'], image.key()),
         }))

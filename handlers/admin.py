@@ -22,7 +22,7 @@ class AdminHandler(webapp.RequestHandler):
                     highlight_amount = highlight.amount
                 
                 template_values = { 
-                    'img_upload_url': blobstore.create_upload_url('/img/upload'), 
+                    'img_upload_url': blobstore.create_upload_url('/v1/img/upload'), 
                     'host': self.request.headers['Host'],
                     'logout_url': users.create_logout_url('/'),
                     'highlight_id': highlight_id,

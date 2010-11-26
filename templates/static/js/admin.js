@@ -6,6 +6,11 @@ var generate_bookmarklet = function() {
 	var js = $('#bookmarklet_js').val();
 	js = js.replace('#username#', $('#meme_username').val());
 	$('#bookmarklet').attr('href', js);
+	
+	var postlater_url = 'http://' + $('#host').val() + '/v1/postlater/' + $('#meme_username').val()
+	$('#postlater_posts').attr('href', postlater_url);
+	$('#postlater_posts').html(postlater_url);
+	
 	$('#bookmarklet_text').show();
 };
 
