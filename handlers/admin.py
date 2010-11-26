@@ -14,6 +14,8 @@ class AdminHandler(webapp.RequestHandler):
                     'img_upload_url': blobstore.create_upload_url('/img/upload'), 
                     'host': self.request.headers['Host'],
                     'logout_url': users.create_logout_url('/'),
+                    'highlight_query': 'poker',
+                    'highlight_amount': '1',
                 }
                 path = os.path.join(os.path.dirname(__file__), '../templates/admin.html')
                 self.response.out.write(template.render(path, template_values))
