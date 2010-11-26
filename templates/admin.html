@@ -3,25 +3,59 @@
         <title>Yahoo! Meme iOS Backend application</title>
         <script type="text/javascript" charset="utf-8" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
         <script type="text/javascript" charset="utf-8">
-        $(document).ready(function() {
-            $('#generate_bookmarklet').click(function(){
-                var js = $('#bookmarklet_js').val();
-                js = js.replace('#username#', $('#meme_username').val());
-                $('#bookmarklet').attr('href', js);
-                $('#bookmarklet_text').show();
-            });
-            
-            $('#meme_query').change(function(){
-              // do stuff
-            });
-        });
+          var yql_console = 'http://developer.yahoo.com/yql/console/#h=';
+          var yql_query_template = 'SELECT * FROM meme.search(#meme_query_amount#) WHERE query="#meme_query#"';
+          var meme_search_template = 'http://meme.yahoo.com/search/?q=#meme_query#';
+        
+          var update_yql_query = function() {
+              var new_query = yql_query_template;
+              new_query = new_query.replace('#meme_query_amount#', $('#meme_query_amount').val());
+              new_query = new_query.replace('#meme_query#', $('#meme_query').val());
+              $('#yql_query').html(new_query);
+              $('#yql_query_link').attr('href', yql_console + new_query.replace('=', '%3D'));
+              
+              var new_search = meme_search_template.replace('#meme_query#', $('#meme_query').val());
+              $('#meme_search').html(new_search);
+              $('#meme_search_link').attr('href', new_search);
+          };
+          
+          var generate_bookmarklet = function() {
+              var js = $('#bookmarklet_js').val();
+              js = js.replace('#username#', $('#meme_username').val());
+              $('#bookmarklet').attr('href', js);
+              $('#bookmarklet_text').show();
+          };
+          
+          var highlight_submit = function() {
+              var query = $('#meme_query').val();
+              var amount = $('#meme_query_amount').val();
+              var valid_amount = /^[1-9]{1}$/g;
+              
+              if ((query == '') || (amount == '')) {
+                  alert('You need to fill "Meme Query" and "Max. results" fields.');
+              } else if (!valid_amount.test(amount)) {
+                  alert('"Max. results" field only supports numeric values (> 0).');
+              } else {
+                  document.forms['highlight_form'].submit();
+              }
+          };
+        
+          $(document).ready(function() {
+              $('#generate_bookmarklet').click(function(){ generate_bookmarklet() });
+              $('#meme_query').keyup(function(){ update_yql_query(); });
+              $('#meme_query').keydown(function(){ update_yql_query(); });
+              $('#meme_query_amount').keyup(function(){ update_yql_query(); });
+              $('#meme_query_amount').keydown(function(){ update_yql_query(); });
+              $('#highlight_submit').click(function(){ highlight_submit(); });
+              update_yql_query();
+          });
         </script>
     </head>
     <body>
         <h1>Yahoo! Meme iOS Backend application</h1>
         <h2>Image upload</h2>
         <p>
-            <form action="{{ img_upload_url }}" method="POST" enctype="multipart/form-data">
+            <form id="img_form" action="{{ img_upload_url }}" method="POST" enctype="multipart/form-data">
                 Upload File: <input type="file" name="file"> <input type="submit" name="submit" value="Submit">
             </form>
         </p>
@@ -33,11 +67,14 @@
         </p>
         <h2>App Highlights</h2>
         <p>
-            <form action="/hightlight/update" method="POST">
-                Meme Query: <input type="text" id="meme_query" name="meme_query"> Results: <select name="amount" id="amount"><option>1</option></select><br>
-                Remember to test your query! The query will be:
-                <a href="http://developer.yahoo.com/yql/console/#h=query" target="_blank"><pre>SELECT * FROM meme.search(3) WHERE query="meme rocks"</pre></a>
-                <input type="submit" value="Update!">
+            <form id="highlight_form" action="/hightlight/update" method="POST">
+                Meme Query: <input type="text" id="meme_query" name="meme_query" size="50" maxlength="100" value="{{ meme_query }}"> Max. results: <input type="text" name="meme_query_amount" id="meme_query_amount" size="1" maxlength="1" value="{{ meme_query_amount }}"><br><br>
+                <b>Remember to test your queries before updating:</b><br>
+                <ul>
+                    <li>YQL query: <a id="yql_query_link" href="#" target="_blank"><span id="yql_query"></span></a></li>
+                    <li>Meme search results: <a id="meme_search_link" href="#" target="_blank"><span id="meme_search"></span></a></li>
+                </ul>
+                <input id="highlight_submit" type="button" value="Update!">
             </form>
         </p>
         <br>
