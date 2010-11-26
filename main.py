@@ -2,6 +2,7 @@
 import wsgiref.handlers
 from google.appengine.ext import blobstore, webapp
 
+from handlers.admin import AdminHandler
 from handlers.main import MainHandler
 from handlers.image import ImageHandler, ImageUploadHandler, ImageUploadUrlHandler, ImageExpirationHandler
 from handlers.postlater import PostLaterHandler, PostLaterAddHandler, PostLaterDeleteHandler
@@ -11,6 +12,7 @@ def main():
     
     application = webapp.WSGIApplication([
                 ('/', MainHandler), 
+                ('/admin', AdminHandler), 
                 ('/img/expiration', ImageExpirationHandler), 
                 ('/img/upload/url', ImageUploadUrlHandler), 
                 ('/img/upload', ImageUploadHandler), 

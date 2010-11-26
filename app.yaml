@@ -4,5 +4,9 @@ runtime: python
 api_version: 1
 
 handlers:
+- url: /admin/.*
+  script: main.py
+  login: admin
+  secure: always
 - url: .*
   script: main.py
