@@ -26,8 +26,8 @@ class AdminHandler(webapp.RequestHandler):
                     'host': self.request.headers['Host'],
                     'logout_url': users.create_logout_url('/'),
                     'highlight_id': highlight_id,
-                    'highlight_query': highlight_query,
-                    'highlight_amount': highlight_amount,
+                    'highlight_query': highlight_query or '',
+                    'highlight_amount': highlight_amount or '',
                 }
                 path = os.path.join(os.path.dirname(__file__), '../templates/admin.html')
                 self.response.out.write(template.render(path, template_values))

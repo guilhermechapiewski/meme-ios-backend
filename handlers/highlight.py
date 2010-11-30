@@ -7,11 +7,22 @@ from models import Highlight
 
 class HighlightUpdateHandler(webapp.RequestHandler):
     def post(self):
-        highlight = Highlight(
-            name=self.request.get('highlight_name'), 
-            query=self.request.get('highlight_query'), 
-            amount=int(self.request.get('highlight_amount')), 
-        )
+        highlights = Highlight.all().filter('name =', self.request.get('highlight_name'))
+        highlight = None
+        
+        # try to find the highlight already persisted
+        for h in highlights:
+            highlight = h
+        
+        # if highlight wasn't found, means that we sould create another one
+        if highlight is None:
+            highlight = Highlight(name=self.request.get('highlight_name'))
+        
+        # add new data to highlight and...
+        highlight.query = self.request.get('highlight_query')
+        highlight.amount = int(self.request.get('highlight_amount'))
+        
+        # ...create or update
         highlight.put()
         
         self.redirect('/admin')
