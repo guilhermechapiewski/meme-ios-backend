@@ -1,3 +1,3 @@
 h1. meme-ios-backend
 
-*meme-ios-backend* is the Backend application used by "Yahoo! Meme":http://me.me iOS apps (for "iPhone":http://github.com/acarlos1000/iMeme and "iPad":http://github.com/acarlos1000/MemeiPad).
+*meme-ios-backend* is the Backend application used by "Yahoo! Meme":http://me.me iOS apps (for "iPhone":http://github.com/acarlos1000/MemeiPhone and "iPad":http://github.com/acarlos1000/MemeiPad).

@@ -1,4 +1,4 @@
 cron:
 - description: Delete images older than 30 minutes.
-  url: /img/expiration
+  url: /v1/img/expiration
   schedule: every 5 minutes
