@@ -27,7 +27,8 @@ class ImageExpirationHandler(webapp.RequestHandler):
             half_hour_ago = now - datetime.timedelta(minutes=30)
             for image in Image.all().filter('date <', half_hour_ago):
                 image_blob = blobstore.BlobInfo.get(image.blob_key)
-                image_blob.delete()
+                if image_blob:
+                        image_blob.delete()
                 image.delete()
 
 class ImageUploadUrlHandler(webapp.RequestHandler):
